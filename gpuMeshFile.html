@@ -81,20 +81,7 @@
         }, undefined, function (error) {
             console.error('Error loading OBJ:', error);
         });
-        loader.load('https://tywjof-busnaw-fibhy3.github.io/AYANEE/myModel.obj', function (object) {
-            object.castShadow = true; // ✅ วัตถุนี้สร้างเงา
-            // ตั้งค่า castShadow กับทุก mesh ใน object
-            object.traverse(function (child) {
-                if (child.isMesh) {
-                    child.castShadow = true; // ✅ วัตถุนี้สร้างเงา
-                    child.receiveShadow = true; // ✅ วัตถุนี้รับเงา
-                }
-            });
-            scene.add(object);
-        }, undefined, function (error) {
-            console.error('Error loading OBJ:', error);
-        });
-
+        
         // ✅ render loop
         function animate(t) {
 
