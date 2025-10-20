@@ -107,14 +107,14 @@
     const uvTexture = textureLoader1.load('https://tywjof-busnaw-fibhy3.github.io/Deco/pic.jpg');
 
     const texturedPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(3, 3, 32, 32),
+      new THREE.PlaneGeometry(7, 7, 32, 32),
       new THREE.MeshStandardMaterial({
         map: uvTexture,
-        roughness: 0.6,
-        metalness: 0.3
+        roughness: 1.0,
+        metalness: 0.0
       })
     );
-    texturedPlane.position.set(57, 5, 5);
+    texturedPlane.position.set(61, 7, 7);
     texturedPlane.receiveShadow = true;
     texturedPlane.castShadow = true;
     scene.add(texturedPlane);
@@ -268,7 +268,7 @@
       scene.add(model);
     });
 
-    gltfLoader.load('https://tywjof-busnaw-fibhy3.github.io/Deco/white_cartoon_dog.glb',
+    gltfLoader.load('https://tywjof-busnaw-fibhy3.github.io/Deco/lowpoly_japanese_old_house.glb',
     (gltf) => {
       const model = gltf.scene;
       model.traverse((node) => {
@@ -277,7 +277,7 @@
           node.receiveShadow = true;
         }
       });
-      model.position.set(30, 1, -5);
+      model.position.set(38, 1, -20);
       scene.add(model);
     });
 
@@ -303,7 +303,7 @@
           node.receiveShadow = true;
         }
       });
-      model.position.set(35, 2, -15);
+      model.position.set(30, 2, -3);
       scene.add(model);
     });
 
@@ -316,15 +316,27 @@
           node.receiveShadow = true;
         }
       });
-      model.position.set(70, 0.5, 5);
+      model.position.set(80, 0.5, 5);
       scene.add(model);
     });
 
+    gltfLoader.load('https://tywjof-busnaw-fibhy3.github.io/Deco/state_park_sign.glb',
+    (gltf) => {
+      const model = gltf.scene;
+      model.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+      });
+      model.position.set(50, 7, -5);
+      scene.add(model);
+    });
 
-    gltfLoader.load('https://tywjof-busnaw-fibhy3.github.io/Deco/Textname.glb',
+    gltfLoader.load('https://tywjof-busnaw-fibhy3.github.io/Deco/Textname1.glb',
     (gltf) => {
       textNameModel = gltf.scene;
-      textNameModel.position.set(50, 5, 5);
+      textNameModel.position.set(50, 7, 5);
       textNameModel.rotation.x = Math.PI / 2;
       textNameModel.userData.clickable = true;
       textNameModel.userData.targetView = 'textname';
@@ -418,6 +430,7 @@
       return clickable;
     }
 
+    // Click event for desktop
     window.addEventListener('click', (event) => {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -462,6 +475,52 @@
       }
     });
 
+    // Touch event for mobile - เพิ่มส่วนนี้
+    window.addEventListener('touchend', (event) => {
+      if (event.changedTouches.length > 0) {
+        const touch = event.changedTouches[0];
+        mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+        
+        raycaster.setFromCamera(mouse, camera);
+        
+        // Check text models first
+        const clickableModels = getClickableModels();
+        const textIntersects = raycaster.intersectObjects(clickableModels, false);
+        
+        if (textIntersects.length > 0) {
+          const clicked = textIntersects[0].object;
+          let parentModel = clicked;
+          
+          while (parentModel.parent && !parentModel.userData.clickable) {
+            parentModel = parentModel.parent;
+          }
+          
+          if (parentModel.userData.targetView) {
+            const targetView = parentModel.userData.targetView;
+            currentView = targetView;
+            animateCamera(cameraPositions[targetView].pos, cameraPositions[targetView].target);
+          }
+          return;
+        }
+        
+        const intersects = raycaster.intersectObjects(pickableObjects);
+        
+        if (selectedObject && selectedObject.material.emissive) {
+          selectedObject.material.emissive.setHex(selectedObject.userData.originalEmissive || 0x000000);
+        }
+        
+        if (intersects.length > 0) {
+          selectedObject = intersects[0].object;
+          if (selectedObject.material.emissive) {
+            selectedObject.userData.originalEmissive = selectedObject.material.emissive.getHex();
+            selectedObject.material.emissive.setHex(0x444444);
+          }
+          console.log('Selected:', selectedObject.name || selectedObject.geometry.type);
+        }
+      }
+    });
+
     window.addEventListener('mousemove', (event) => {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -491,9 +550,9 @@
     // Camera Positions
     const cameraPositions = {
       home: { pos: new THREE.Vector3(0, 5, 25), target: new THREE.Vector3(0, 3, 10) },
-      aboutMe: { pos: new THREE.Vector3(50, 8, 18), target: new THREE.Vector3(50, 5, 10) },
+      aboutMe: { pos: new THREE.Vector3(50, 8, 28), target: new THREE.Vector3(50, 7, 20) },
       textname: { pos: new THREE.Vector3(50, 8, 18), target: new THREE.Vector3(50, 5, 10) },
-      credit: { pos: new THREE.Vector3(8, 3.5, 30), target: new THREE.Vector3(8, 5, 27) }
+      credit: { pos: new THREE.Vector3(7, 4.5, 30), target: new THREE.Vector3(7, 5, 27) }
     };
 
     let isAnimating = false;
